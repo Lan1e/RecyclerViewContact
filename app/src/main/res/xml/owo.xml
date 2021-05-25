@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.preference.PreferenceCategory
+        android:key="pref_info"
+        android:title="個人資料"/>
+    <androidx.preference.PreferenceCategory>
+        <androidx.preference.Preference
+            android:key="pref_confirm"
+            android:title="確認"/>
+    </androidx.preference.PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>
