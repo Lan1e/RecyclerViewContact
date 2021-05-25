@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <androidx.preference.PreferenceCategory
         android:key="pref_info"
-        android:title="個人資料"/>
+        android:title="個人資料"
+        android:icon="@drawable/test1"/>
     <androidx.preference.PreferenceCategory>
-        <androidx.preference.Preference
+        <com.example.recyclerviewcontacts.ButtonPreference
             android:key="pref_confirm"
             android:title="確認"/>
     </androidx.preference.PreferenceCategory>
-
 </androidx.preference.PreferenceScreen>

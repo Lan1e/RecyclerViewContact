@@ -4,25 +4,18 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
-import android.widget.LinearLayout
-import androidx.preference.EditTextPreference
-import androidx.preference.Preference.OnPreferenceChangeListener
+import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
+import com.example.recyclerviewcontacts.Entity.Companion.DEFAULT_VAL
 
-class MyEditText(
+class MyPreference(
     context: Context?,
-    attributes: AttributeSet? = null
-) : EditTextPreference(context, attributes), Imageable {
+    attrs: AttributeSet? = null
+) : Preference(context, attrs), Imageable {
     init {
-        summary = Entity.DEFAULT_VAL
-        onPreferenceChangeListener = OnPreferenceChangeListener { _, newValue ->
-            true.also {
-                summary = newValue?.toString() ?: Entity.DEFAULT_VAL
-            }
-        }
         layoutResource = R.layout.layout_my_pref
+        summary = DEFAULT_VAL
     }
-
     override var imageId: Int = -1
         set(value) {
             field = value

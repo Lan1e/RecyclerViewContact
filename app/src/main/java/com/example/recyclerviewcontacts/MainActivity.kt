@@ -23,9 +23,9 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 
 class MainActivity : AppCompatActivity() {
-    val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    val dao get() = ContactDatabase(this).getDao()
-    val contacts = arrayListOf(
+    private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val dao get() = ContactDatabase(this).getDao()
+    private val contacts = arrayListOf(
         Contact("柯健全", "影像處理 圖形識別 電腦圖學", -1),
         Contact("章定遠", "視訊處理 資料壓縮與傳輸 立體視訊處理", -1)
 //        Contact("陳宗和", "05-2717723", "thchen@mail.ncyu.edu.tw"),
@@ -45,7 +45,8 @@ class MainActivity : AppCompatActivity() {
     ).let {
         CopyOnWriteArrayList(it)
     }
-    val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             layoutInflater.inflate(R.layout.contact_row, parent, false).let {
                 object : RecyclerView.ViewHolder(it) {}
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun initDatabase(contacts: List<Contact>) {
+    private fun initDatabase(contacts: List<Contact>) {
         contacts.apply {
             this@MainActivity.getSharedPreferences("minlee", Context.MODE_PRIVATE).run {
                 if (getBoolean("db_initialized", false)) {
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun updateView(contacts: CopyOnWriteArrayList<Contact>) {
+    private fun updateView(contacts: CopyOnWriteArrayList<Contact>) {
         contacts.clear()
         contacts.addAll(dao.getAll().map {
             Contact(it.name, it.major, it.id)
@@ -111,9 +112,6 @@ class MainActivity : AppCompatActivity() {
 
         recycler.setHasFixedSize(true)
         recycler.layoutManager = LinearLayoutManager(this)
-
-
-
         recycler.adapter = adapter
     }
 
@@ -123,32 +121,6 @@ class MainActivity : AppCompatActivity() {
             updateView(contacts)
         }
     }
-
-    private fun call(phoneNum: String) =
-        Intent(Intent.ACTION_DIAL).apply {
-            data = Uri.parse("tel:$phoneNum")
-        }.let {
-            startActivity(it)
-        }
-
-    private fun mail(email: String) =
-        Intent(Intent.ACTION_SEND).apply {
-            data = Uri.parse("mailto: ")
-            type = "text/plain"
-            putExtra(Intent.EXTRA_EMAIL, email)
-            putExtra(Intent.EXTRA_SUBJECT, "寫信給教授")
-            putExtra(Intent.EXTRA_TEXT, "老師好，")
-        }.let {
-            startActivity(Intent.createChooser(it, "Send Email by using: "))
-        }
-
-    private fun sms(phoneNum: String) =
-        Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("smsto:$phoneNum")
-            //putExtra("address", phoneNum)
-        }.let {
-            startActivity(it)
-        }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
@@ -185,24 +157,26 @@ class MainActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { item: MenuItem? ->
             when (item!!.itemId) {
                 R.id.data_update -> {
-                    val intent = Intent(this, EditActivity::class.java)
-                    intent.putExtra("id", id)
+                    val intent = Intent(this, EditActivity::class.java).putExtra("id", id)
                     startActivity(intent)
                 }
                 R.id.data_delete -> {
                     ioScope.launch {
                         dao.delete(Entity().apply { this.id = id })
-                    }
-                    GlobalScope.launch {
-                        withContext(Dispatchers.Main){
+                        contacts.clear()
+                        contacts.addAll(dao.getAll().map {
+                            Contact(it.name, it.major, it.id)
+                        })
+
+                        withContext(Dispatchers.Main) {
                             adapter.notifyDataSetChanged()
                         }
                     }
                 }
                 R.id.data_show -> {
                     val intent = Intent(this, EditActivity::class.java)
-                    intent.putExtra("id", id)
-                    intent.putExtra("readOnly", true)
+                        .putExtra("id", id)
+                        .putExtra("readOnly", true)
                     startActivity(intent)
                 }
             }
