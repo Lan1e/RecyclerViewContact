@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference.OnPreferenceChangeListener
 import androidx.preference.PreferenceViewHolder
+import java.lang.Exception
 
 class MyEditText(
     context: Context?,
@@ -30,10 +31,10 @@ class MyEditText(
         }
 
     override var listener: ((View) -> Unit)? = null
+    override var validator: ((String) -> Boolean)? = null
 
     override fun onBindViewHolder(holder: PreferenceViewHolder?) {
         super.onBindViewHolder(holder)
-
         holder?.itemView?.findViewById<ImageView>(android.R.id.icon)?.setOnClickListener(listener)
     }
 }

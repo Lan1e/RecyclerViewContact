@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
+import java.security.cert.CertPathValidator
 
 class EditFragment : PreferenceFragmentCompat() {
     private val entityId get() = activity?.intent?.getIntExtra("id", -1) ?: -1
@@ -24,14 +26,23 @@ class EditFragment : PreferenceFragmentCompat() {
         findPreference<PreferenceCategory>("pref_info")?.apply {
             addPreference(createPref("pref_name", "名字"))
             addPreference(
-                createPref("pref_phone", "電話", android.R.drawable.stat_sys_vp_phone_call) {
+                createPref("pref_phone", "電話", android.R.drawable.stat_sys_vp_phone_call, {
+                    try {
+                        it.toLong()
+                        true
+                    } catch (e: Exception) {
+                        false
+                    }
+                }) {
                     Intent(Intent.ACTION_DIAL).apply {
                         data = Uri.parse("tel: ${entity.phone}")
                     }.let {
                         startActivity(it)
                     }
                 })
-            addPreference(createPref("pref_email", "電子郵件", android.R.drawable.sym_action_email) {
+            addPreference(createPref("pref_email", "電子郵件", android.R.drawable.sym_action_email,{
+                it.matches(Regex(".*@.*\\.com.*"))
+            }) {
                 Intent(Intent.ACTION_SEND).apply {
                     data = Uri.parse("mailto: ")
                     type = "text/plain"
@@ -99,12 +110,14 @@ class EditFragment : PreferenceFragmentCompat() {
         key: String,
         title: String,
         imageId: Int? = null,
+        validator: ((String) -> Boolean)? = null,
         listener: ((View) -> Unit)? = null
     ): Preference =
         (if (readOnly) MyPreference(context) else MyEditText(context)).apply {
             this.key = key
             this.title = title
             if (readOnly) {
+                this.validator = validator
                 this.listener = listener
                 imageId?.let { this.imageId = it }
             }

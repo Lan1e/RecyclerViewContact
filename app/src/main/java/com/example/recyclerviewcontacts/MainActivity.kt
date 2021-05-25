@@ -1,5 +1,6 @@
 package com.example.recyclerviewcontacts
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -161,17 +162,24 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
                 R.id.data_delete -> {
-                    ioScope.launch {
-                        dao.delete(Entity().apply { this.id = id })
-                        contacts.clear()
-                        contacts.addAll(dao.getAll().map {
-                            Contact(it.name, it.major, it.id)
-                        })
+                    AlertDialog.Builder(this)
+                        .setTitle("警告")
+                        .setMessage("確定要刪除此筆資料嗎?")
+                        .setPositiveButton("確認") { _, _ ->
+                            ioScope.launch {
+                                dao.delete(Entity().apply { this.id = id })
+                                contacts.clear()
+                                contacts.addAll(dao.getAll().map {
+                                    Contact(it.name, it.major, it.id)
+                                })
 
-                        withContext(Dispatchers.Main) {
-                            adapter.notifyDataSetChanged()
+                                withContext(Dispatchers.Main) {
+                                    adapter.notifyDataSetChanged()
+                                }
+                            }
                         }
-                    }
+                        .setNegativeButton("取消", null)
+                        .show()
                 }
                 R.id.data_show -> {
                     val intent = Intent(this, EditActivity::class.java)

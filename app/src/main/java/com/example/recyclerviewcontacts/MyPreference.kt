@@ -7,6 +7,7 @@ import android.widget.ImageView
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.example.recyclerviewcontacts.Entity.Companion.DEFAULT_VAL
+import java.lang.Exception
 
 class MyPreference(
     context: Context?,
@@ -16,6 +17,7 @@ class MyPreference(
         layoutResource = R.layout.layout_my_pref
         summary = DEFAULT_VAL
     }
+
     override var imageId: Int = -1
         set(value) {
             field = value
@@ -23,10 +25,12 @@ class MyPreference(
         }
 
     override var listener: ((View) -> Unit)? = null
+    override var validator: ((String) -> Boolean)? = null
 
     override fun onBindViewHolder(holder: PreferenceViewHolder?) {
         super.onBindViewHolder(holder)
 
         holder?.itemView?.findViewById<ImageView>(android.R.id.icon)?.setOnClickListener(listener)
+        holder?.itemView?.findViewById<ImageView>(android.R.id.icon)?.isEnabled = (validator?.invoke(summary.toString()) != false)
     }
 }
